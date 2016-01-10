@@ -37,7 +37,6 @@ This site is generated using [Jekyll](http://jekyllrb.com/) on [GitHub Pages](ht
 
 The site uses the following external resources:
 
-* [Octicons](https://github.com/github/octicons/) by [GitHub](https://github.com/github/), licensed under the [MIT license](http://choosealicense.com/licenses/mit/).
 * [Syntax highlighter styles](https://github.com/mojombo/tpw/blob/master/css/syntax.css) by [Tom Preston-Werner](http://tom.preston-werner.com/), also licensed under the MIT license.
 * [jQuery](http://jquery.com/) by the [jQuery Foundation](https://jquery.org/team/), also licensed under the MIT license.
 * [Marked](https://github.com/chjj/marked) by [Christopher Jeffrey](https://twitter.com/_chjj), also licensed under the MIT license.

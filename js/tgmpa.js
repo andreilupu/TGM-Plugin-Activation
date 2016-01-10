@@ -6,7 +6,7 @@
 	var _hash,
 		versionNr     = $( '.version-number' ), // Site-wide.
 		releaseDate   = $( '.release-date' ), // Homepage, download page.
-		zipUrls, tarUrls, releasesTable, releaseNotes, releases, spinner, feedbackElm,
+		zipUrls, tarUrls, releasesTable, releaseNotes, releases, spinner, wporgField, feedbackElm,
 		feedbackMsg, reportError, latestVersion, latestRelease, releasePublished; // Download page.
 
 	zipUrls       = $( '.latest-zip' );
@@ -15,6 +15,7 @@
 	releaseNotes  = $( '#release-notes' );
 	releases      = releasesTable.find( 'tbody' );
 	spinner       = $( '#spinner' );
+	wporgField    = $( '#tgmpa-form-wporg' );
 	feedbackElm   = $( '.generator-feedback' );
 	feedbackMsg   = $( '#generator-feedback' );
 	reportError   = $( '#report-generator-error' );
@@ -257,21 +258,21 @@
 	 */
 	function showMessage( text, classname ) {
 		spinner.hide();
-		feedbackElm.fadeTo( 200, 1 );
+		feedbackElm.fadeTo( 200, 1 ).attr( 'aria-hidden', 'false' );
 		feedbackMsg.addClass( classname ).html( text );
 		if ( 'error' === classname ) {
-			reportError.fadeTo( 0, 1 );
+			reportError.fadeTo( 0, 1 ).attr( 'aria-hidden', 'false' );
 		}
 		if ( 'success' === classname ) {
-			feedbackElm.delay( 5000 ).fadeTo( 1200, 0 );
+			feedbackElm.delay( 5000 ).fadeTo( 1200, 0 ).attr( 'aria-hidden', 'true' );
 		}
 	}
 
 	function resetMessage() {
 		spinner.show();
-		feedbackElm.fadeTo( 0, 0 );
+		feedbackElm.fadeTo( 0, 0 ).attr( 'aria-hidden', 'true' );
 		feedbackMsg.removeClass().html( '' );
-		reportError.fadeTo( 0, 0 );
+		reportError.fadeTo( 0, 0 ).attr( 'aria-hidden', 'true' );
 	}
 
 	/**
@@ -494,18 +495,21 @@
 	 * Only show the wp.org checkbox if the targeted usage is a theme.
 	 */
 	$( 'input:radio[name="tgmpa-flavor"]' ).on( 'change', function() {
-		var wporgField = $( '#tgmpa-form-wporg' ),
-			value      = $( this ).val();
+		var value = $( this ).val();
 
 		if ( 'parent-theme' === value || 'child-theme' === value ) {
-			wporgField.fadeTo( 400, 1 );
+			wporgField.fadeTo( 400, 1 ).attr( 'aria-hidden', 'false' );
 		} else {
-			wporgField.fadeTo( 400, 0 );
+			wporgField.fadeTo( 400, 0 ).attr( 'aria-hidden', 'true' );
 		}
 	});
 
 	// Make sure the state is correct on page load.
-	$( 'input:radio[name="tgmpa-flavor"]:checked' ).trigger( 'change' );
+	if ( $( 'input:radio[name="tgmpa-flavor"]' ).is( ':checked' ) ) {
+		$( 'input:radio[name="tgmpa-flavor"]:checked' ).trigger( 'change' );
+	} else {
+		wporgField.fadeTo( 400, 0 ).attr( 'aria-hidden', 'true' );
+	}
 
 	//=========================
 	// Custom TGMPA Generation
