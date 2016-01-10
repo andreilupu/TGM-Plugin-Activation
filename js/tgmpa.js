@@ -464,7 +464,7 @@
 			replacement = '';
 
 		reHookIns          = /[\t]+\/\*(?:[^\*]+\*)+\/\s+add_action\( 'init', array\( \$this, 'load_textdomain' \)[^)]*\);\s+add_filter\( 'load_textdomain_mofile'[^\r\n]+/;
-		reLoadFunction     = /[\t]+\/[\*]{2}(?:[^*]+\*)+\/\s+public function load_textdomain\(\) \{(?:[^\}]+\}){3}/;
+		reLoadFunction     = /[\t]+\/[\*]{2}(?:[^*]+\*)+\/\s+public function load_textdomain\(\) \{(?:[^\}]+\}){4}/;
 		reOverloadFunctionA = /[\t]+\/[\*]{2}(?:[^*]+\*)+\/\s+public function correct_plugin_mofile\([^\)]*\) \{(?:[^\}]+\}){4}/;
 		reOverloadFunctionB = /[\t]+\/[\*]{2}(?:[^*]+\*)+\/\s+public function overload_textdomain_mofile\([^\)]*\) \{(?:[^\}]+\}){5}/;
 
