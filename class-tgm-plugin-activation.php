@@ -514,9 +514,9 @@ if ( ! class_exists( 'TGM_Plugin_Activation' ) ) {
 			}
 
 			// Current fallback file is not valid, let's try the alternative option.
-			if ( strpos( $mofile, '/themes/' ) !== false ) {
+			if ( false !== strpos( $mofile, '/themes/' ) ) {
 				return str_replace( '/themes/', '/plugins/', $mofile );
-			} elseif ( strpos( $mofile, '/plugins/' ) !== false ) {
+			} elseif ( false !== strpos( $mofile, '/plugins/' ) ) {
 				return str_replace( '/plugins/', '/themes/', $mofile );
 			} else {
 				return $mofile;
