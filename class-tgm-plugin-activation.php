@@ -444,9 +444,9 @@ if ( ! class_exists( 'TGM_Plugin_Activation' ) ) {
 		 *
 		 * @since 2.x.x
 		 *
-		 * @internal Uses `load_theme_textdomain()` rather than `load_plugin_textdomain()` to
+		 * (@internal Uses `load_theme_textdomain()` rather than `load_plugin_textdomain()` to
 		 * get round the different ways of handling the path and deprecated notices being thrown
-		 * and such. For plugins, the actual file name will be corrected by a filter.
+		 * and such. For plugins, the actual file name will be corrected by a filter.}}
 		 *
 		 * {@internal IMPORTANT! If this function changes, review the regex in the custom TGMPA
 		 * generator on the website.}}
