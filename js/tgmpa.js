@@ -369,22 +369,38 @@
 	 *
 	 * Used for both class-tgm-plugin-activation.php as well as example.php.
 	 *
+	 * The regexes will work as long as there are no strings which contain a ')' within the string,
+	 * though the few strings which contain '(%s)' and '%1$s (%2$d/%3$d)' are accounted for.
+	 * If another type of string with a ')' in it would be added, the regexes will need adjusting
+	 * or a new regex may need to be added.
+	 *
 	 * @param {string} searchString The original text domain.
 	 * @param {string} replacement  The text domain to replace it with.
 	 * @param {string} content      The content to search through.
 	 * @returns {string}
 	 */
 	function replaceTextDomain( searchString, replacement, content ) {
-		var re;
+		var reBracketsA, reBracketsB, reNoBrackets;
 
 		// Regex escape, but we're not going to be using the searchstring within brackets, so don't escape dashes.
 		searchString = reEscape( searchString );
 		searchString = searchString.replace( /\\-/g, '-' );
 
 		replacement  = '$1' + replacement + '$2';
-		re           = new RegExp( '((?:_[_enx]|_[en]x|_n[x]?_noop|__ngettext_noop)\\([^\\)]+,\\s+\')' + searchString + '(\'\\s+\\))', 'g' ); // N.B.: This will also catch esc_attr__ and esc_html__ variants.
 
-		return content.replace( re, replacement );
+		// Deals with "All <span class="count">(%s)</span>" type strings.
+		reBracketsA   = new RegExp( '((?:_[_enx]|_[en]x|_n[x]?_noop|__ngettext_noop|translate_nooped_plural)\\((?:[^\\)]+%s\\)){2}[^\\)]+,\\s+\')' + searchString + '(\'\\s+\\))', 'g' );
+
+		// Deals with "Updating Plugin %1$s (%2$d/%3$d)" type strings.
+		reBracketsB   = new RegExp( '((?:_[_enx]|_[en]x|_n[x]?_noop|__ngettext_noop|translate_nooped_plural)\\([^\\)]+?%1\\$s \\(%2\\$d/%3\\$d\\)\',\\s+\')' + searchString + '(\'\\s+\\))', 'g' );
+
+		// Deals with strings without () in them.
+		reNoBrackets = new RegExp( '((?:_[_enx]|_[en]x|_n[x]?_noop|__ngettext_noop|translate_nooped_plural)\\([^\\)]+,\\s+\')' + searchString + '(\'\\s+\\))', 'g' ); // N.B.: This will also catch esc_attr__ and esc_html__ variants.
+
+		content = content.replace( reBracketsA, replacement );
+		content = content.replace( reBracketsB, replacement );
+		content = content.replace( reNoBrackets, replacement );
+		return content;
 	}
 
 	/**
@@ -594,24 +610,24 @@
 				zip = new JSZip( data );
 
 				/*
-				 * File example.php
+				 * File example.php.
 				 */
 				exampleFileContent = zip.file( tgmpaDir + '/example.php' ).asText();
 
-				// Replace text domain
+				// Replace text domain.
 				exampleFileContent = replaceTextDomain( 'theme-slug', slug, exampleFileContent );
 				exampleFileContent = replaceTextDomain( 'tgmpa', slug, exampleFileContent ); // In 2.5.2 is one wrongly tagged string.
 
-				// Replace the file include call
+				// Replace the file include call.
 				exampleFileContent = replaceIncludeCall( exampleFileContent, addonType );
 
-				// Replace the bundled plugin variable
+				// Replace the bundled plugin variable.
 				exampleFileContent = replaceBundledPluginVariable( exampleFileContent, addonType );
 
-				// Replace function name
+				// Replace function name.
 				exampleFileContent = exampleFileContent.replace( /([ '"])my_theme_register_required_plugins(['"\(])/g, '$1' + prefix + '_register_required_plugins$2' );
 
-				// Replace id used for notices
+				// Replace id used for notices.
 				exampleFileContent = exampleFileContent.replace( /('id'\s+=>\s+')tgmpa(',)/, '$1' + slug + '$2' );
 
 				// If plugin: change the typical menu location and capability.
@@ -631,7 +647,7 @@
 				zip.file( tgmpaDir + '/example.php', exampleFileContent );
 
 				/*
-				 * File class-tgm-plugin-activation.php
+				 * File class-tgm-plugin-activation.php.
 				 */
 				if ( 'other' !== publishType && ( 'parent-theme' === addonType || 'child-theme' === addonType ) ) {
 					classFileContent = zip.file( tgmpaDir + '/class-tgm-plugin-activation.php' ).asText();
@@ -640,6 +656,7 @@
 					classFileContent = replaceAddAdminMenuFunction( classFileContent );
 
 					if ( 'wporg' === publishType ) {
+
 						// Remove the load textdomain related functions.
 						classFileContent = removeLoadTextDomainFunctions( classFileContent );
 
@@ -654,6 +671,7 @@
 					zip.file( tgmpaDir + '/class-tgm-plugin-activation.php', classFileContent );
 
 					if ( 'wporg' === publishType ) {
+
 						// Remove the languages directory.
 						zip.remove( tgmpaDir + '/languages' );
 					}
