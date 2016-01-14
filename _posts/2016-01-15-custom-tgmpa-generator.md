@@ -22,7 +22,7 @@ Well, no more. We've heard you and we've worked hard to make this easier for you
 
 So today, we are releasing a _**Custom TGMPA Generator**_. You can find it on the [Download] page.
 
-Just fill out the form with the _text-domain_ of your theme or plugin, what sort of WordPress add-on you will be including TGMPA in and, if it's a theme, whether you intend to publish it on wordpress.org and we'll generate a custom download of the current version of TGMPA for you with all the relevant code already adjusted.
+Just fill out the form with the _text-domain_ of your theme or plugin, what sort of WordPress add-on you will be including TGMPA in and, if it's a theme, the publication channel you'll be using and we'll generate a custom download of the current version of TGMPA for you with all the relevant code already adjusted.
 
 We hope you like it. As this is a first release, there may of course still be some bugs. If you find one, please [report] it to us and we'll try and fix it as soon as possible.
 
