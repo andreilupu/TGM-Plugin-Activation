@@ -503,11 +503,12 @@ div#download table {
 
 .tgmpa-generator-form .generator-notes {
 	float: left;
-	width: 70%;
+	width: 46%;
 	font-size: 80%;
 }
 .tgmpa-generator-form .generator-notes ul {
-	padding: 1em 0 0 2em;
+	padding: 5em 0 0 2em;
+	margin: 1em 0 0;
 }
 
 

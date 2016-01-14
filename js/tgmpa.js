@@ -6,20 +6,20 @@
 	var _hash,
 		versionNr     = $( '.version-number' ), // Site-wide.
 		releaseDate   = $( '.release-date' ), // Homepage, download page.
-		zipUrls, tarUrls, releasesTable, releaseNotes, releases, spinner, wporgField, feedbackElm,
+		zipUrls, tarUrls, releasesTable, releaseNotes, releases, spinner, publishFieldset, feedbackElm,
 		feedbackMsg, reportError, latestVersion, latestRelease, releasePublished; // Download page.
 
-	zipUrls       = $( '.latest-zip' );
-	tarUrls       = $( '.latest-tar' );
-	releasesTable = $( '#releases-table' );
-	releaseNotes  = $( '#release-notes' );
-	releases      = releasesTable.find( 'tbody' );
-	spinner       = $( '#spinner' );
-	wporgField    = $( '#tgmpa-form-wporg' );
-	feedbackElm   = $( '.generator-feedback' );
-	feedbackMsg   = $( '#generator-feedback' );
-	reportError   = $( '#report-generator-error' );
-	latestVersion = '';
+	zipUrls         = $( '.latest-zip' );
+	tarUrls         = $( '.latest-tar' );
+	releasesTable   = $( '#releases-table' );
+	releaseNotes    = $( '#release-notes' );
+	releases        = releasesTable.find( 'tbody' );
+	spinner         = $( '#spinner' );
+	publishFieldset = $( '#tgmpa-form-publish' );
+	feedbackElm     = $( '.generator-feedback' );
+	feedbackMsg     = $( '#generator-feedback' );
+	reportError     = $( '#report-generator-error' );
+	latestVersion   = '';
 
 	/**
 	 * Redirect hash locations from the pre-2.5.0 website to their new location.
@@ -323,6 +323,17 @@
 	}
 
 	/**
+	 * Validate the received publish type.
+	 *
+	 * @param {string} publishType The target publication channel.
+	 * @returns {number} -1 if it doesn't match, 0 or higher if it does.
+	 */
+	function validatePublishType( publishType ) {
+		var valid = new Array( 'wporg', 'themeforest', 'other' );
+		return $.inArray( publishType, valid );
+	}
+
+	/**
 	 * Escape a string for use in a regular expression.
 	 *
 	 * @param {string} str The string to escape.
@@ -337,13 +348,19 @@
 	 *
 	 * Used for both class-tgm-plugin-activation.php as well as example.php but only when they're adjusted.
 	 *
-	 * @param {string} content   The content to search through.
-	 * @param {string} addonName The name of the theme or plugin.
-	 * @param {string} addonType Whether the target is a parent-theme, child-theme or plugin.
+	 * @param {string} content     The content to search through.
+	 * @param {string} addonName   The name of the theme or plugin.
+	 * @param {string} addonType   Whether the target is a parent-theme, child-theme or plugin.
+	 * @param {string} publishType The target publication channel.
 	 * @returns {string}
 	 */
-	function addGeneratorUseIndicator( content, addonName, addonType ) {
+	function addGeneratorUseIndicator( content, addonName, addonType, publishType ) {
 		var replacement = ' for ' + addonType.replace( /-/g, ' ' ) + ' ' + addonName;
+		if ( 'wporg' === publishType ) {
+			replacement += ' for publication on WordPress.org';
+		} else if ( 'themeforest' === publishType ) {
+			replacement += ' for publication on ThemeForest';
+		}
 		return content.replace( /(\* @version\s+[0-9\.]+)([\r\n]+)/, '$1' + replacement + '$2' );
 	}
 
@@ -426,7 +443,7 @@
 	/**
 	 * Remove the config variables to change the menu page.
 	 *
-	 * Used for example.php when the target usage is a theme to be published on wp.org.
+	 * Used for example.php when the target usage is a theme to be published on wp.org or themeforest.
 	 *
 	 * @param {string} content The content to search through.
 	 * @returns {string}
@@ -438,7 +455,8 @@
 	/**
 	 * Replace the content of the add_admin_menu() function to comply with the theme review requirements.
 	 *
-	 * Used for class-tgm-plugin-activation.php when the target usage is a theme to be published on wp.org.
+	 * Used for class-tgm-plugin-activation.php when the target usage is a theme to be published
+	 * on wp.org or themeforest.
 	 *
 	 * @param {string} content The content to search through.
 	 * @returns {string}
@@ -492,15 +510,15 @@
 	});
 
 	/**
-	 * Only show the wp.org checkbox if the targeted usage is a theme.
+	 * Only show the publication channel fieldset if the targeted usage is a theme.
 	 */
 	$( 'input:radio[name="tgmpa-flavor"]' ).on( 'change', function() {
 		var value = $( this ).val();
 
 		if ( 'parent-theme' === value || 'child-theme' === value ) {
-			wporgField.fadeTo( 400, 1 ).attr( 'aria-hidden', 'false' );
+			publishFieldset.fadeTo( 400, 1 ).attr( 'aria-hidden', 'false' );
 		} else {
-			wporgField.fadeTo( 400, 0 ).attr( 'aria-hidden', 'true' );
+			publishFieldset.fadeTo( 400, 0 ).attr( 'aria-hidden', 'true' );
 		}
 	});
 
@@ -508,15 +526,14 @@
 	if ( $( 'input:radio[name="tgmpa-flavor"]' ).is( ':checked' ) ) {
 		$( 'input:radio[name="tgmpa-flavor"]:checked' ).trigger( 'change' );
 	} else {
-		wporgField.fadeTo( 400, 0 ).attr( 'aria-hidden', 'true' );
+		publishFieldset.fadeTo( 400, 0 ).attr( 'aria-hidden', 'true' );
 	}
 
 	//=========================
 	// Custom TGMPA Generation
 	//=========================
 	$( '#generator-form' ).on( 'submit', function( event ) {
-		var tgmpaDir, slug, prefix, addonName, addonType,
-			wporg = 0,
+		var tgmpaDir, slug, prefix, addonName, addonType, publishType,
 			zip, exampleFileContent, classFileContent, blob;
 
 		event.preventDefault();
@@ -548,8 +565,9 @@
 			addonName = slug.replace( /-/g, ' ' ).toTitleCase();
 		}
 
-		if ( $( '#tgmpa-wporg' ).is( ':checked' ) ) {
-			wporg = 1;
+		publishType = 'other';
+		if ( $( 'input:radio[name="tgmpa-publish"]' ).is( ':checked' ) ) {
+			publishType = $( 'input:radio[name="tgmpa-publish"]:checked' ).val();
 		}
 
 		// Make sure the prefix has underscores, no dashes.
@@ -558,7 +576,7 @@
 		/**
 		 * Validate the received data.
 		 */
-		if ( ( validateSlug( slug ) === -1 || validatePrefix( prefix ) === -1 ) || ( validateName( addonName ) === -1 || validateAddonType( addonType ) === -1 ) ) {
+		if ( ( validateSlug( slug ) === -1 || validatePrefix( prefix ) === -1 ) || ( validateName( addonName ) === -1 || validateAddonType( addonType ) === -1 ) || validatePublishType( publishType ) === -1 ) {
 			showMessage( 'Invalid input received.', 'error' );
 
 			return false;
@@ -601,13 +619,13 @@
 					exampleFileContent = replaceMenuConfigVariables( exampleFileContent );
 				}
 
-				// WP.org: remove config variables to change the menu page.
-				else if ( 1 === wporg && ( 'parent-theme' === addonType || 'child-theme' === addonType ) ) {
+				// WP.org & Themeforest: remove config variables to change the menu page.
+				else if ( ( 'wporg' === publishType || 'themeforest' === publishType ) && ( 'parent-theme' === addonType || 'child-theme' === addonType ) ) {
 					exampleFileContent = removeMenuConfigVariables( exampleFileContent );
 				}
 
 				// Show that the file was adjusted using the generator.
-				exampleFileContent = addGeneratorUseIndicator( exampleFileContent, addonName, addonType );
+				exampleFileContent = addGeneratorUseIndicator( exampleFileContent, addonName, addonType, publishType );
 
 				// Replace the original file with the new content.
 				zip.file( tgmpaDir + '/example.php', exampleFileContent );
@@ -615,26 +633,30 @@
 				/*
 				 * File class-tgm-plugin-activation.php
 				 */
-				if ( 1 === wporg && ( 'parent-theme' === addonType || 'child-theme' === addonType ) ) {
+				if ( 'other' !== publishType && ( 'parent-theme' === addonType || 'child-theme' === addonType ) ) {
 					classFileContent = zip.file( tgmpaDir + '/class-tgm-plugin-activation.php' ).asText();
 
 					// Replace the add admin menu function.
 					classFileContent = replaceAddAdminMenuFunction( classFileContent );
 
-					// Remove the load textdomain related functions.
-					classFileContent = removeLoadTextDomainFunctions( classFileContent );
+					if ( 'wporg' === publishType ) {
+						// Remove the load textdomain related functions.
+						classFileContent = removeLoadTextDomainFunctions( classFileContent );
 
-					// Replace text domain.
-					classFileContent = replaceTextDomain( 'tgmpa', slug, classFileContent );
+						// Replace text domain.
+						classFileContent = replaceTextDomain( 'tgmpa', slug, classFileContent );
+					}
 
 					// Show that the file was adjusted using the generator.
-					classFileContent = addGeneratorUseIndicator( classFileContent, addonName, addonType );
+					classFileContent = addGeneratorUseIndicator( classFileContent, addonName, addonType, publishType );
 
 					// Replace the original file with the new content.
 					zip.file( tgmpaDir + '/class-tgm-plugin-activation.php', classFileContent );
 
-					// Remove the languages directory.
-					zip.remove( tgmpaDir + '/languages' );
+					if ( 'wporg' === publishType ) {
+						// Remove the languages directory.
+						zip.remove( tgmpaDir + '/languages' );
+					}
 				}
 
 				/*

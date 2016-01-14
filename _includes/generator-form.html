@@ -16,6 +16,19 @@
 				<input type="radio" id="tgmpa-flavor-plugin" name="tgmpa-flavor" value="plugin" required="required" aria-required="true" />
 				<label for="tgmpa-flavor-plugin">Plugin</label>
 			</fieldset>
+
+			<fieldset id="tgmpa-form-publish" aria-live="polite" aria-hidden="true">
+				<legend>I intend to distribute the theme via:</legend>
+
+				<input type="radio" id="tgmpa-publish-wporg" name="tgmpa-publish" value="wporg" />
+				<label for="tgmpa-publish-wporg">WordPress.org</label>
+				<br />
+				<input type="radio" id="tgmpa-publish-themeforest" name="tgmpa-publish" value="themeforest" />
+				<label for="tgmpa-publish-themeforest">ThemeForest</label>
+				<br />
+				<input type="radio" id="tgmpa-publish-other" name="tgmpa-publish" value="other" />
+				<label for="tgmpa-publish-other">Some other way</label>
+			</fieldset>
 		</section>
 
 		<section class="tgmpa-form-secondary">
@@ -34,10 +47,6 @@
 			<input type="text" id="tgmpa-name" name="tgmpa-name" placeholder="Theme or Plugin Name" value="" pattern="[A-Za-z0-9 _-]+" title="Allowed characters: alphanumeric, space, underscores and dashes" />
 			</fieldset>
 
-			<fieldset id="tgmpa-form-wporg" aria-live="polite" aria-hidden="true">
-				<input type="checkbox" id="tgmpa-wporg" name="tgmpa_wporg" value="1">
-				<label for="tgmpa-wporg">Do you intend to distribute the theme via wordpress.org ?</label>
-			</fieldset>
 		</section>
 
 		<section class="tgmpa-form-ternary">
